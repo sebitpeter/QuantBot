@@ -1,0 +1,22 @@
+# ---------------------------------------------------------------
+# Trading Bot – Python dependencies
+# ---------------------------------------------------------------
+# Install with:
+#   pip install -r requirements.txt
+#
+# For crypto trading (ccxt):
+ccxt>=4.3.0
+
+# For stock / crypto trading via Alpaca:
+alpaca-trade-api>=3.1.1
+
+# Technical indicators (numpy is used internally by the strategy;
+# optionally swap in pandas_ta or TA-Lib for more indicators):
+numpy>=1.26.0
+pandas>=2.2.0
+
+# Environment variable loading:
+python-dotenv>=1.0.0
+
+# Optional: richer logging / monitoring
+# colorlog>=6.8.0

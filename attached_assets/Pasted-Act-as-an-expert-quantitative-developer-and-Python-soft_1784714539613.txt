@@ -1,0 +1,41 @@
+Act as an expert quantitative developer and Python software engineer. 
+
+I need you to write a modular, production-ready trading bot in Python that dynamically accepts a list of asset symbols (e.g., ['BTC/USDT', 'ETH/USDT', 'AAPL', 'TSLA']) and executes trades based on a structured strategy.
+
+---
+
+### Core Requirements
+
+1. **Dynamic Asset Input:**
+   - The bot must accept a list of symbols as a configuration variable or command-line argument.
+   - It should iterate over each asset dynamically without hardcoding specific tickers in the core strategy logic.
+
+2. **API & Execution Layer:**
+   - Use standard trading libraries such as `ccxt` (for crypto) or `alpaca-trade-api` (for stocks/crypto).
+   - Implement place-order functions supporting Market and Limit orders with explicit parameter checks.
+   - Use environment variables (`.env`) for sensitive API keys and secrets.
+
+3. **Strategy Logic:**
+   - Implement a simple, customizable technical indicator strategy (e.g., 20/50 Exponential Moving Average (EMA) Crossover with RSI filter).
+   - Include clear condition functions: `check_buy_signal(symbol)` and `check_sell_signal(symbol)`.
+
+4. **Risk & Position Management (Crucial):**
+   - **Position Sizing:** Calculate order quantity dynamically based on a risk percentage per trade (e.g., risk max 2% of total account equity per asset).
+   - **Stop-Loss & Take-Profit:** Automatically set a Stop-Loss (e.g., 2% below entry) and Take-Profit (e.g., 4% above entry) for every opened position.
+   - **Max Open Positions:** Limit total concurrent open trades across all asset symbols.
+
+5. **Error Handling & Logging:**
+   - Use Python's `logging` module to log trade signals, order fills, errors, and current portfolio state to both the console and a `bot.log` file.
+   - Include robust `try/except` blocks around API calls (e.g., network timeouts, rate limits, insufficient funds).
+
+6. **Execution Loop:**
+   - Include a main polling loop with configurable sleep intervals (e.g., run check every 1 minute or 1 hour).
+   - Handle graceful shutdowns (closing connections on `Ctrl+C`).
+
+---
+
+### Output Requirements
+- Provide clean, PEP-8 compliant code with inline docstrings explaining each function.
+- Include a `requirements.txt` file list.
+- Briefly explain how to configure `.env` keys and run the script in testnet/paper-trading mode first.
+-

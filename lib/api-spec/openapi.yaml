@@ -1,0 +1,467 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Trading Bot Dashboard API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: bot
+    description: Bot control and configuration
+  - name: positions
+    description: Open positions
+  - name: signals
+    description: Trade signals
+  - name: market
+    description: Market data
+  - name: portfolio
+    description: Portfolio analytics
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /bot/status:
+    get:
+      operationId: getBotStatus
+      tags: [bot]
+      summary: Get bot running status
+      responses:
+        "200":
+          description: Bot status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStatus"
+
+  /bot/start:
+    post:
+      operationId: startBot
+      tags: [bot]
+      summary: Start the trading bot
+      responses:
+        "200":
+          description: Bot started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStatus"
+
+  /bot/stop:
+    post:
+      operationId: stopBot
+      tags: [bot]
+      summary: Stop the trading bot
+      responses:
+        "200":
+          description: Bot stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStatus"
+
+  /bot/config:
+    get:
+      operationId: getBotConfig
+      tags: [bot]
+      summary: Get bot configuration
+      responses:
+        "200":
+          description: Current configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotConfig"
+    put:
+      operationId: updateBotConfig
+      tags: [bot]
+      summary: Update bot configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BotConfigInput"
+      responses:
+        "200":
+          description: Updated configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotConfig"
+        "400":
+          description: Invalid configuration
+
+  /bot/logs:
+    get:
+      operationId: getBotLogs
+      tags: [bot]
+      summary: Get recent bot log entries
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+      responses:
+        "200":
+          description: Log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogEntry"
+
+  /positions:
+    get:
+      operationId: getPositions
+      tags: [positions]
+      summary: Get all open positions
+      responses:
+        "200":
+          description: Open positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Position"
+
+  /positions/{symbol}:
+    delete:
+      operationId: closePosition
+      tags: [positions]
+      summary: Manually close an open position
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Position closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClosePositionResult"
+        "404":
+          description: Position not found
+
+  /signals:
+    get:
+      operationId: getSignals
+      tags: [signals]
+      summary: Get recent trade signals
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: symbol
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trade signals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Signal"
+
+  /market/prices:
+    get:
+      operationId: getMarketPrices
+      tags: [market]
+      summary: Get current prices for all configured symbols
+      responses:
+        "200":
+          description: Market prices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MarketPrice"
+
+  /portfolio/summary:
+    get:
+      operationId: getPortfolioSummary
+      tags: [portfolio]
+      summary: Get portfolio summary and statistics
+      responses:
+        "200":
+          description: Portfolio summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortfolioSummary"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    BotStatus:
+      type: object
+      required: [running, mode, exchange, uptime, currentCycle]
+      properties:
+        running:
+          type: boolean
+        mode:
+          type: string
+        exchange:
+          type: string
+        uptime:
+          type: number
+        currentCycle:
+          type: integer
+        startedAt:
+          type: ["string", "null"]
+
+    BotConfig:
+      type: object
+      required:
+        - symbols
+        - timeframe
+        - emaFast
+        - emaSlow
+        - rsiPeriod
+        - rsiOversold
+        - rsiOverbought
+        - riskPerTrade
+        - stopLossPct
+        - takeProfitPct
+        - maxOpenPositions
+        - pollIntervalSeconds
+        - orderType
+        - mode
+      properties:
+        symbols:
+          type: array
+          items:
+            type: string
+        timeframe:
+          type: string
+        emaFast:
+          type: integer
+        emaSlow:
+          type: integer
+        rsiPeriod:
+          type: integer
+        rsiOversold:
+          type: number
+        rsiOverbought:
+          type: number
+        riskPerTrade:
+          type: number
+        stopLossPct:
+          type: number
+        takeProfitPct:
+          type: number
+        maxOpenPositions:
+          type: integer
+        pollIntervalSeconds:
+          type: integer
+        orderType:
+          type: string
+        mode:
+          type: string
+
+    BotConfigInput:
+      type: object
+      properties:
+        symbols:
+          type: array
+          items:
+            type: string
+        timeframe:
+          type: string
+        emaFast:
+          type: integer
+        emaSlow:
+          type: integer
+        rsiPeriod:
+          type: integer
+        rsiOversold:
+          type: number
+        rsiOverbought:
+          type: number
+        riskPerTrade:
+          type: number
+        stopLossPct:
+          type: number
+        takeProfitPct:
+          type: number
+        maxOpenPositions:
+          type: integer
+        pollIntervalSeconds:
+          type: integer
+        orderType:
+          type: string
+        mode:
+          type: string
+
+    Position:
+      type: object
+      required:
+        - symbol
+        - side
+        - entryPrice
+        - currentPrice
+        - quantity
+        - stopLoss
+        - takeProfit
+        - unrealisedPnl
+        - pnlPct
+        - openedAt
+      properties:
+        symbol:
+          type: string
+        side:
+          type: string
+        entryPrice:
+          type: number
+        currentPrice:
+          type: number
+        quantity:
+          type: number
+        stopLoss:
+          type: number
+        takeProfit:
+          type: number
+        unrealisedPnl:
+          type: number
+        pnlPct:
+          type: number
+        openedAt:
+          type: string
+
+    ClosePositionResult:
+      type: object
+      required: [success, symbol, message]
+      properties:
+        success:
+          type: boolean
+        symbol:
+          type: string
+        message:
+          type: string
+
+    Signal:
+      type: object
+      required:
+        - id
+        - symbol
+        - type
+        - price
+        - emaFast
+        - emaSlow
+        - rsi
+        - action
+        - timestamp
+      properties:
+        id:
+          type: string
+        symbol:
+          type: string
+        type:
+          type: string
+        price:
+          type: number
+        emaFast:
+          type: number
+        emaSlow:
+          type: number
+        rsi:
+          type: number
+        action:
+          type: string
+        reason:
+          type: ["string", "null"]
+        timestamp:
+          type: string
+
+    MarketPrice:
+      type: object
+      required: [symbol, price, timestamp]
+      properties:
+        symbol:
+          type: string
+        price:
+          type: number
+        change24h:
+          type: ["number", "null"]
+        high24h:
+          type: ["number", "null"]
+        low24h:
+          type: ["number", "null"]
+        volume24h:
+          type: ["number", "null"]
+        timestamp:
+          type: string
+
+    PortfolioSummary:
+      type: object
+      required:
+        - equity
+        - totalUnrealisedPnl
+        - openPositions
+        - totalSignals
+        - buySignals
+        - sellSignals
+        - totalCycles
+      properties:
+        equity:
+          type: number
+        totalUnrealisedPnl:
+          type: number
+        openPositions:
+          type: integer
+        totalSignals:
+          type: integer
+        buySignals:
+          type: integer
+        sellSignals:
+          type: integer
+        totalCycles:
+          type: integer
+        winRate:
+          type: ["number", "null"]
+
+    LogEntry:
+      type: object
+      required: [id, level, message, timestamp]
+      properties:
+        id:
+          type: string
+        level:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+        symbol:
+          type: ["string", "null"]
